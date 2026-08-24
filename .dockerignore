@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# Virtual environments (local dependencies)
+.venv/
+venv/
+ENV/
+env/
+
+# Sensitive data and configuration
+.env
+*.env
+secrets.json
+.aws/
+.ssh/
+
+# Version control system metadata
+.git/
+.gitignore
+.hg/
+.svn/
+
+# Testing, coverage, and linting
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# IDE and OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentation and build outputs
+docs/_build/
+dist/
+build/
+*.egg-info/
+
+# Local log files
+*.log
