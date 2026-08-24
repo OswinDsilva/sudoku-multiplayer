@@ -10,3 +10,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# temporary files
+test.py

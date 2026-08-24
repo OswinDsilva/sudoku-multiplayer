@@ -1,24 +1,20 @@
 from pydantic import BaseModel
-from pydantic.functional_validators import field_validator
+
+from .board import Board
+from .player import Player
 
 
 class Mode(BaseModel):
-    difficulty: str
+    time: float
 
-    @field_validator("difficulty")
-    @classmethod
-    def convert_to_lowercase(cls, v: str) -> str:
-        return v.lower();
+    def get_board(self, p: Player):
+        pass
 
-    @field_validator("difficulty")
-    @classmethod
-    def validate_difficulty(cls, v: str) -> str:
-        if v not in ("easy", "medium", "hard"):
-            raise ValueError("Invalid difficulty")
-        return v
+    def make_move(self, p:Player):
+        pass
 
 class SyncMode(Mode):
     pass
 
-class IndividualMode(Mode):
-    pass
+class RaceMode(Mode):
+    board_player_mapping: dict[str, Board]
