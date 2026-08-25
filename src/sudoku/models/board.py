@@ -1,15 +1,19 @@
 import random
 from typing import Any
+import copy
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.functional_validators import field_validator
 
 
 class Board(BaseModel):
-    board: list[list[int]]
-    completed: bool
-    cells_filled: int
+    board: list[list[int]] = Field(
+        default_factory=lambda:[[0 for _ in range(9)] for _ in range(9)]
+    )
+    completed: bool = False
+    cells_filled: int = 0
     sol_found: bool = False
+    _hints: list[list[int]]
     _rows: list[list[bool]]
     _cols: list[list[bool]]
     _squares: list[list[bool]]
@@ -45,8 +49,8 @@ class Board(BaseModel):
 
     def generate_board(self):
         _ = self._generate_grid(0,0)
-        print(self.board)
         self._destroy_cells()
+        self._hints = copy.deepcopy(self.board)
 
     def _generate_grid(self,i: int, j: int) -> bool:
         if i == 9:
@@ -98,8 +102,30 @@ class Board(BaseModel):
         return self._rows[row][value-1] or self._cols[col][value-1] or self._squares[sq_idx][value-1]
 
     def fill_cell(self, row: int, col: int , value: int ):
-        if not self._validate_move(row, col, value):
-            pass
+        # handle at API layer later
+        if(row >= 9 or row < 0 or col >= 9 or col < 0 or value < 1 or value > 9):
+            raise IndexError("Beyond bounds")
+
+        if self.board[row][col] == value:
+            return
+
+        if self._validate_move(row, col, value):
+            raise ValueError("Conflicting")
+
+        if self.board[row][col] != 0:
+            self.clear_cell(row, col)
+
+        self._set_cell(row, col, value)
+
+    def clear_cell(self, row: int, col: int):
+        # handle at API layer later
+        if(row >= 9 or row < 0 or col >= 9 or col < 0):
+            raise IndexError("Beyond bounds")
+
+        if self._hints[row][col] != 0:
+            raise ValueError("Cannot clear initial hints")
+
+        self._del_cell(row, col, self.board[row][col])
 
     def _uniquely_solvable(self,i: int, j: int) -> bool:
         if i == 9:
@@ -126,6 +152,5 @@ class Board(BaseModel):
                 return False
 
             self._del_cell(i, j, num)
-
 
         return True
