@@ -1,4 +1,5 @@
 import random
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic.functional_validators import field_validator
@@ -9,9 +10,15 @@ class Board(BaseModel):
     completed: bool
     cells_filled: int
     sol_found: bool = False
-    _rows: list[list[bool]] = [[False for _ in range(9)] for _ in range(9)]
-    _cols: list[list[bool]] = [[False for _ in range(9)] for _ in range(9)]
-    _squares: list[list[bool]] = [[False for _ in range(9)] for _ in range(9)]
+    _rows: list[list[bool]]
+    _cols: list[list[bool]]
+    _squares: list[list[bool]]
+
+    def __init__(self, /, **data: Any) -> None:
+        super().__init__(**data)
+        self._rows = [[False for _ in range(9)] for _ in range(9)]
+        self._cols = [[False for _ in range(9)] for _ in range(9)]
+        self._squares = [[False for _ in range(9)] for _ in range(9)]
 
     @field_validator("board")
     @classmethod
@@ -49,13 +56,12 @@ class Board(BaseModel):
         if self.board[i][j] != 0:
             return self._generate_grid(i, j+1)
         for num in range(1,9+1):
-            square_idx = (i // 3) * 3 + (j // 3)
-            if self._rows[i][num-1] or self._cols[j][num-1] or self._squares[square_idx][num-1]:
+            if self._validate_move(i, j, num):
                 continue
-            self._set_cell(i,j,num)
+            self._set_cell(i, j, num)
             if self._generate_grid(i, j+1):
                 return True
-            self._del_cell(i,j,num)
+            self._del_cell(i, j, num)
         return False
 
     def _destroy_cells(self):
@@ -63,13 +69,11 @@ class Board(BaseModel):
         lower_bound = 35
 
         itr = 0
-        print(self.cells_filled)
         while (lower_bound < self.cells_filled < upper_bound and itr % 9 != 0) or self.cells_filled > upper_bound:
             if(itr > 81):
                 break
             i = random.randint(0, 8)
             j = random.randint(0, 8)
-            print(f"i:{i},j:{j},itr:{itr},cells_filled:{self.cells_filled}")
 
             if self.board[i][j] == 0:
                 itr +=  1
@@ -77,6 +81,7 @@ class Board(BaseModel):
 
             val = self.board[i][j]
             self._del_cell(i,j,val)
+            self.sol_found = False
             if not self._uniquely_solvable(0, 0):
                 self._set_cell(i,j,val)
 
@@ -90,7 +95,6 @@ class Board(BaseModel):
         if not self._validate_move(row, col, value):
             pass
 
-    # bugged , fix tomorrow
     def _uniquely_solvable(self,i: int, j: int) -> bool:
         if i == 9:
             if self.sol_found:
@@ -105,37 +109,17 @@ class Board(BaseModel):
         if self.board[i][j] != 0:
             return self._uniquely_solvable(i, j+1)
 
-        can_continue = True
         for num in range(1,9+1):
-            if self._validate_move(i,j, num):
-                continue
-
-            self._set_cell(i,j,num)
-
-            can_continue = self._uniquely_solvable(i, j+1)
-
-            self._del_cell(i,j,num)
-
-            if not can_continue:
-                return False
-
-        return can_continue
-
-
-    def _unique_solution(self, i:int, j:int) -> bool:
-        if(i == 9):
-            pass # return based on if a solution has been found or not
-
-        if(j == 9):
-            _ = self._unique_solution(i+1, 0)
-
-        if(self.board[i][j] != 0):
-            _ = self._unique_solution(i, j+1)
-
-        for num in range(1, 9+1):
-            if self._validate_move(i,j,num):
+            if self._validate_move(i, j, num):
                 continue
 
             self._set_cell(i, j, num)
-            _ = self._unique_solution(i, j+1)
+
+            if not self._uniquely_solvable(i, j+1):
+                self._del_cell(i, j, num)
+                return False
+
             self._del_cell(i, j, num)
+
+
+        return True
