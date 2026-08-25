@@ -45,6 +45,7 @@ class Board(BaseModel):
 
     def generate_board(self):
         _ = self._generate_grid(0,0)
+        print(self.board)
         self._destroy_cells()
 
     def _generate_grid(self,i: int, j: int) -> bool:
@@ -55,13 +56,18 @@ class Board(BaseModel):
 
         if self.board[i][j] != 0:
             return self._generate_grid(i, j+1)
-        for num in range(1,9+1):
+
+        numbers = [1,2,3,4,5,6,7,8,9]
+        random.shuffle(numbers)
+        while numbers:
+            num = numbers.pop()
             if self._validate_move(i, j, num):
                 continue
             self._set_cell(i, j, num)
             if self._generate_grid(i, j+1):
                 return True
             self._del_cell(i, j, num)
+
         return False
 
     def _destroy_cells(self):
