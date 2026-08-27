@@ -1,0 +1,39 @@
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.grid
+{
+    display:grid;
+    grid-template-columns: repeat(9,80px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -57.5%);
+    width: 720px;
+    height: 720px;
+}
+
+.square
+{
+    height: 80px;
+    width: 80px;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.number-selector
+{
+    display: grid;
+    grid-template-columns: repeat(9, 80px);
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    width: 720px;
+    height: 80px;
+    border: 1px solid black;
+}
