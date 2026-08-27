@@ -1,9 +1,12 @@
-import random
-from typing import Any
 import copy
+import random
+from typing import Any, override
 
 from pydantic import BaseModel, Field
+from pydantic.fields import PrivateAttr
 from pydantic.functional_validators import field_validator
+
+from ..exceptions import HintCellRemovalError, InvalidMoveError
 
 
 class Board(BaseModel):
@@ -13,16 +16,17 @@ class Board(BaseModel):
     completed: bool = False
     cells_filled: int = 0
     sol_found: bool = False
-    _hints: list[list[int]]
-    _rows: list[list[bool]]
-    _cols: list[list[bool]]
-    _squares: list[list[bool]]
+    _hints: list[list[int]] = PrivateAttr()
+    _rows: list[list[bool]] = PrivateAttr()
+    _cols: list[list[bool]] = PrivateAttr()
+    _squares: list[list[bool]] = PrivateAttr()
 
-    def __init__(self, /, **data: Any) -> None:
-        super().__init__(**data)
+    @override
+    def model_post_init(self, __context: Any, /) -> None:          # pyright: ignore[reportExplicitAny, reportAny]
         self._rows = [[False for _ in range(9)] for _ in range(9)]
         self._cols = [[False for _ in range(9)] for _ in range(9)]
         self._squares = [[False for _ in range(9)] for _ in range(9)]
+
 
     @field_validator("board")
     @classmethod
@@ -102,7 +106,7 @@ class Board(BaseModel):
         return self._rows[row][value-1] or self._cols[col][value-1] or self._squares[sq_idx][value-1]
 
     def fill_cell(self, row: int, col: int , value: int ):
-        # handle at API layer later
+        # handled at API layer, but defensive check
         if(row >= 9 or row < 0 or col >= 9 or col < 0 or value < 1 or value > 9):
             raise IndexError("Beyond bounds")
 
@@ -110,7 +114,7 @@ class Board(BaseModel):
             return
 
         if self._validate_move(row, col, value):
-            raise ValueError("Conflicting")
+            raise InvalidMoveError()
 
         if self.board[row][col] != 0:
             self.clear_cell(row, col)
@@ -118,12 +122,12 @@ class Board(BaseModel):
         self._set_cell(row, col, value)
 
     def clear_cell(self, row: int, col: int):
-        # handle at API layer later
+        # handled at API layer, defensive check
         if(row >= 9 or row < 0 or col >= 9 or col < 0):
             raise IndexError("Beyond bounds")
 
         if self._hints[row][col] != 0:
-            raise ValueError("Cannot clear initial hints")
+            raise HintCellRemovalError()
 
         self._del_cell(row, col, self.board[row][col])
 
