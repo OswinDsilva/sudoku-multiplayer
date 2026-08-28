@@ -14,7 +14,7 @@ current_board: Board = Board()
 def create_board():
     current_board.generate_board()
     return {
-        "board": current_board.board,
+        "board": current_board.board
     }
 
 @router.get("/board")

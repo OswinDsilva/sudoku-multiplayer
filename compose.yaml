@@ -6,3 +6,9 @@ services:
       image: sudoku-backend
       ports:
         - 8000:8000
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - 5000:80
