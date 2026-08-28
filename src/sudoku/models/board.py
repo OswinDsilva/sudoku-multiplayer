@@ -110,6 +110,9 @@ class Board(BaseModel):
         if(row >= 9 or row < 0 or col >= 9 or col < 0 or value < 1 or value > 9):
             raise IndexError("Beyond bounds")
 
+        if self._hints[row][col] != 0:
+            raise HintCellRemovalError()
+
         if self.board[row][col] == value:
             return
 
