@@ -10,3 +10,7 @@ class CellFillRequest(BaseModel):
 class CellClearRequest(BaseModel):
     row: int = Field(ge=0, lt=9)
     col: int = Field(ge=0, lt=9)
+
+
+class UpdateBoardRequest(BaseModel):
+    board: list[list[int]]

@@ -1,6 +1,9 @@
-from .board import CellClearRequest, CellFillRequest
+from .board import CellClearRequest, CellFillRequest, UpdateBoardRequest
+from .room import Event
 
 __all__ = [
     "CellClearRequest",
-    "CellFillRequest"
+    "CellFillRequest",
+    "Event",
+    "UpdateBoardRequest",
 ]
