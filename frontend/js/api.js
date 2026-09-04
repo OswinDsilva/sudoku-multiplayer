@@ -4,10 +4,7 @@ export async function startGame() {
   const url = backend_url + "/boards/start"
   try {
     const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Length': '0' // Best practice for empty POST requests
-      }
+      method: 'POST'
     })
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`)

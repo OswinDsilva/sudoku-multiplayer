@@ -1,26 +1,28 @@
-from pydantic import BaseModel
-from pydantic.functional_validators import field_validator
+import uuid
 
-from .mode import Mode
+from fastapi import WebSocket
+from pydantic import BaseModel
+
+from ..models import Board
+from ..schema import Event
 
 
 class Room(BaseModel):
-    room_id: str
+    room_id: uuid.UUID = uuid.uuid4()
     room_size: int
-    difficulty: str
-    mode: Mode
+    board: Board = Board()
+    active_connections: list[WebSocket] = []
 
-    @field_validator("difficulty")
-    @classmethod
-    def convert_to_lowercase(cls, v: str) -> str:
-        return v.lower();
+    async def connect_socket(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
 
-    @field_validator("difficulty")
-    @classmethod
-    def validate_difficulty(cls, v: str) -> str:
-        if v not in ("easy", "medium", "hard"):
-            raise ValueError("Invalid difficulty")
-        return v
+    def disconnect_socket(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
 
-    def select_mode(self):
-        pass
+    async def broadcast(self, event: Event):
+        for connection in self.active_connections:
+            await connection.send_json(event.model_dump())
+
+    def set_board(self, board: Board):
+        self.board = board
