@@ -3,7 +3,6 @@ from copy import deepcopy
 
 from fastapi import WebSocket, WebSocketDisconnect, status
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRouter
 
 from ..models import Room
@@ -29,32 +28,39 @@ async def handle_event_routing(event: Event, id: uuid.UUID):
         data = UpdateBoardRequest.model_validate(data)
         room.board.board = data.board
 
+    elif event.type == "start_game":
+        if room.game_state == "not-started":
+            room.game_state = "started"
+            room.board.generate_board()
+
+
     payload =  Event.model_validate({
         "type": "update_board",
-        "body": deepcopy(room.board.board)
+        "body": {
+            "board": deepcopy(room.board.board),
+            "gameState": room.game_state
+        }
     })
     await room.broadcast(payload)
 
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_room(room_size: int) -> RedirectResponse:
+async def create_room(room_size: int) -> dict:
     room = Room(room_size=room_size)
     rooms_mapping[room.room_id] = room
 
-    return RedirectResponse(
-        url=f"/room/{room.room_id}",
-        status_code=status.HTTP_303_SEE_OTHER
-    )
+    return {
+        "room_id": room.room_id
+    }
 
 # id as a query parameter
 @router.get("/join")
-async def join_room(id: uuid.UUID) -> RedirectResponse:
+async def join_room(id: uuid.UUID) -> dict:
     if id not in rooms_mapping:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    return RedirectResponse(
-        url=f"/room/{id}",
-        status_code=status.HTTP_303_SEE_OTHER
-    )
+    return {
+        "room_id": id
+    }
 
 @router.websocket("/{id}")
 async def game_room(id: uuid.UUID, websocket: WebSocket):

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -14,3 +16,4 @@ class CellClearRequest(BaseModel):
 
 class UpdateBoardRequest(BaseModel):
     board: list[list[int]]
+    gameState: Literal["not-started", "started"]

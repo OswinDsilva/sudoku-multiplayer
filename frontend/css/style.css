@@ -21,6 +21,9 @@
 {
     height: 80px;
     width: 80px;
+    display: flex;
+    justify-content: center; /* Centers text horizontally */
+    align-items: center;
     border: 1px solid black;
     background-color: white;
 }
