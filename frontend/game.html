@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <button id="startButton">Start Game</button>
+    <select id="difficultyDropDown">
+        <option value="">select an option</option>
+        <option value="easy">Easy</option>
+        <option value="mid">Medium</option>
+        <option value="hard">Hard</option>
+    </select>
+    <label for="userInput">Room Size</label>
+    <input type="text" id="userInput" placeholder="Type vroom">
+    <div class="grid"></div>
+    <div class="number-selector"></div>
+    <script type="module" src="./js/game.js"></script>
+</body>
+</html>

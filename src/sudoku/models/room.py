@@ -1,17 +1,18 @@
 import uuid
 
 from fastapi import WebSocket
-from pydantic import BaseModel
 
 from ..models import Board
 from ..schema import Event
 
 
-class Room(BaseModel):
-    room_id: uuid.UUID = uuid.uuid4()
-    room_size: int
-    board: Board = Board()
-    active_connections: list[WebSocket] = []
+class Room:
+    def __init__(self, room_size:int) :
+        self.room_id: uuid.UUID = uuid.uuid4()
+        self.room_size: int = room_size
+        self.board: Board = Board()
+        self.active_connections: list[WebSocket] = []
+        self.game_state: str = "not-started"
 
     async def connect_socket(self, websocket: WebSocket):
         await websocket.accept()

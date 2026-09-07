@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing_extensions import Literal
 
 
 class CellFillRequest(BaseModel):
@@ -14,3 +15,4 @@ class CellClearRequest(BaseModel):
 
 class UpdateBoardRequest(BaseModel):
     board: list[list[int]]
+    gameState: Literal["not-started", "started"]
